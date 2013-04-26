@@ -1,6 +1,6 @@
 require 'mysql2'
 
-client = Mysql2::Client.new(:host => "dev.mysql.lo.mixi.jp", :username => "root", :database => "jun_sumida")
+client = Mysql2::Client.new(:host => "your_db_host", :username => "root", :database => "jun_sumida")
 
 client.query("drop table if exists members")
 client.query("drop table if exists links")
@@ -70,41 +70,47 @@ end
     #")
 end
 
-1.upto(3000).each do
-    begin
-        from_id = rand(1000)
-        to_id   = rand(1000) 
- 
-        if from_id != to_id 
-            to_id = rand(1000)
-        end
+1.upto(12500).each do
+    from_id = rand(1000)
+    to_id   = rand(1000) 
 
-        client.query("
-            INSERT INTO links (
-                from_id,
-                to_id,
-                created_at
-            ) VALUES (
-                " + from_id.to_s + ",
-                " + to_id.to_s   + ",
-                NOW()
-            );
-        ")
-    rescue
-        retry
-    else
-        client.query("
-            INSERT INTO links (
-                from_id,
-                to_id,
-                created_at
-            ) VALUES (
-                " + to_id.to_s + ",
-                " + from_id.to_s   + ",
-                NOW()
-            );
-        ")
+    flag = true
+    while flag do
+        #p from_id
+        #p to_id
+        #p "SELECT COUNT(*) FROM links WHERE from_id = " + from_id.to_s + " AND to_id = " + to_id.to_s + ";"
+        count = client.query("SELECT COUNT(*) AS count FROM links WHERE from_id = " + from_id.to_s + " AND to_id = " + to_id.to_s + ";").first
+        #p count["count"] 
+        if from_id != to_id and count["count"] != 1
+            flag = false
+        else
+            from_id = rand(1000)
+            to_id   = rand(1000) 
+        end
     end
+    
+    client.query("
+        INSERT INTO links (
+            from_id,
+            to_id,
+            created_at
+        ) VALUES (
+            " + from_id.to_s + ",
+            " + to_id.to_s   + ",
+            NOW()
+        );
+    ")
+    client.query("
+        INSERT INTO links (
+            from_id,
+            to_id,
+            created_at
+        ) VALUES (
+            " + to_id.to_s + ",
+            " + from_id.to_s   + ",
+            NOW()
+        );
+    ")
 end
 
 #client.query("
@@ -113,8 +119,8 @@ end
 #    p member
 #end
 
-client.query("
-    SELECT * FROM links;
-").each do |link|
-    p link
-end
+#client.query("
+#    SELECT * FROM links;
+#").each do |link|
+#    p link
+#end
