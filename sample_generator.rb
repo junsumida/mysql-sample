@@ -1,6 +1,6 @@
 require 'mysql2'
 
-client = Mysql2::Client.new(:host => "your_db_host", :username => "root", :database => "jun_sumida")
+client = Mysql2::Client.new(:host => "localhost", :username => "root", :database => "jun_sumida")
 
 client.query("drop table if exists members")
 client.query("drop table if exists links")
@@ -49,7 +49,9 @@ def generate_sex
     sex[rand(3)] 
 end
 
-1.upto(1000).each do
+MAX_OF_MEMBERS = 1000;
+
+1.upto(MAX_OF_MEMBERS).each do
     client.query("
         INSERT INTO members (
             name,
@@ -62,17 +64,12 @@ end
         );
     ")
        
-    #client.query("
-    #    INSERT INTO footprint_notify (
-    #        
-    #    )
-    #             
-    #")
+    #shud i insert a query for footprint_notify?
 end
 
 1.upto(12500).each do
-    from_id = rand(1000)
-    to_id   = rand(1000) 
+    from_id = rand(MAX_OF_MEMBERS)
+    to_id   = rand(MAX_OF_MEMBERS) 
 
     flag = true
     while flag do
@@ -84,8 +81,8 @@ end
         if from_id != to_id and count["count"] != 1
             flag = false
         else
-            from_id = rand(1000)
-            to_id   = rand(1000) 
+            from_id = rand(MAX_OF_MEMBERS)
+            to_id   = rand(MAX_OF_MEMBERS) 
         end
     end
     
@@ -112,15 +109,3 @@ end
         );
     ")
 end
-
-#client.query("
-#    SELECT * FROM members;             
-#").each do |member|
-#    p member
-#end
-
-#client.query("
-#    SELECT * FROM links;
-#").each do |link|
-#    p link
-#end
